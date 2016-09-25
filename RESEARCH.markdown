@@ -11,6 +11,7 @@
      * [Bread board (retired)](https://www.sparkfun.com/products/retired/137) $?.??
      * [Jumpers](https://www.sparkfun.com/products/8431) $3.95
      * [Break-away headers](https://www.sparkfun.com/products/116) $1.95
+ * [Pan / Tilt face tracking with the raspberry pi](http://www.instructables.com/id/Pan-Tilt-face-tracking-with-the-raspberry-pi/?ALLSTEPS)
  * [Controlling a Servo with a BeagleBone Black](https://learn.adafruit.com/controlling-a-servo-with-a-beaglebone-black/overview)
  * [Installation of Adafruit-BeagleBone-IO-Python on Debian](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/installation-on-ubuntu)
 
