@@ -7,7 +7,7 @@ import cv2
 
 def main(cascade_xml):
     cascade = cv2.CascadeClassifier(cascade_xml)
-    capture = cv2.VideoCapture(1)
+    capture = cv2.VideoCapture(0)
 
     while True:
         # Capture frame-by-frame
@@ -25,6 +25,7 @@ def main(cascade_xml):
 
         # Draw a rectangle around the faces
         for (x, y, w, h) in faces:
+            print x, y, w, h
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
         # Display the resulting frame
