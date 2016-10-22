@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+
+
+import sys
+import cv2
+
+from larabot import PanTilt
+
+
+def main():
+    cascade_xml = len(sys.argv) > 1 and sys.argv[1] or "haarcascade_frontalface_default.xml"
+    cascade = cv2.CascadeClassifier(cascade_xml)
+    capture = cv2.VideoCapture(2)
+
+    frame_width = capture.get(3)
+    frame_height = capture.get(4)
+
+    middle_x = frame_width / 2
+    middle_y = frame_height / 2
+
+    def reset(ctrl):
+        ctrl.pan(90)
+        ctrl.tilt(140)
+
+    pt = PanTilt("/dev/ttyACM0")
+
+    zero_count = 0
+
+    while True:
+        # Capture frame-by-frame
+        ret, frame = capture.read()
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        faces = cascade.detectMultiScale(
+            gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(30, 30),
+            flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+        )
+
+        biggest = None
+        biggest_x = biggest_y = biggest_w = biggest_h = 0
+
+        for (x, y, w, h) in faces:
+            #print x, y, w, h
+            area = w * h
+            if area > biggest:
+                biggest = area
+                biggest_x = x
+                biggest_y = y
+                biggest_w = w
+                biggest_h = h
+            # Draw a rectangle around the faces
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+        #print "biggest is", biggest_x, biggest_y, biggest_w, biggest_h
+        center_x = biggest_x + (biggest_w / 2)
+        center_y = biggest_y + (biggest_h / 2)
+        print "center is:", center_x, center_y
+        if center_x > 0 and center_y > 0:
+            zero_count = 0
+            if center_x < middle_x:
+                if ((middle_x - center_x) > (frame_width * .2)):
+                    pt.pan(pt.current_pan + 2)
+                elif ((middle_x - center_x) > (frame_width * .1)):
+                    pt.pan(pt.current_pan + 1)
+            elif center_x > middle_x:
+                if ((center_x - middle_x) > (frame_width * .2)):
+                    pt.pan(pt.current_pan - 2)
+                elif ((center_x - middle_x) > (frame_width * .1)):
+                    pt.pan(pt.current_pan - 1)
+            if center_y < middle_y:
+                if (middle_y - center_y) > (frame_height * .2):
+                    pt.tilt(pt.current_tilt - 2)
+                elif (middle_y - center_y) > (frame_height * .1):
+                    pt.tilt(pt.current_tilt - 1)
+            elif center_y > middle_y:
+                if (center_y - middle_y) > (frame_height * .2):
+                    pt.tilt(pt.current_tilt + 2)
+                if (center_y - middle_y) > (frame_height * .1):
+                    pt.tilt(pt.current_tilt + 1)
+        else:
+            zero_count += 1
+
+        if zero_count > 10:
+            reset(pt)
+
+        # Display the resulting frame
+        cv2.imshow('Video', frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            reset(pt)
+            break
+
+    # When everything is done, release the capture
+    capture.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()
