@@ -15,13 +15,19 @@ class PanTilt(object):
         self.tilt(140)
         self.pan(90)
 
-    def tilt(self, pos):
+    def tilt(self, val):
+        self.set_tilt(self.current_tilt + val)
+
+    def pan(self, val):
+        self.set_pan(self.current_pan + val)
+
+    def set_tilt(self, pos):
         if pos < 0 or pos > PanTilt.limit:
             return
         self.command(0, pos)
         self.current_tilt = pos
 
-    def pan(self, pos):
+    def set_pan(self, pos):
         if pos < 0 or pos > PanTilt.limit:
             return
         self.command(1, pos)

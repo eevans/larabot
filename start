@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 
+import math
 import sys
 import cv2
 
@@ -55,32 +56,25 @@ def main():
             # Draw a rectangle around the faces
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-        #print "biggest is", biggest_x, biggest_y, biggest_w, biggest_h
         center_x = biggest_x + (biggest_w / 2)
         center_y = biggest_y + (biggest_h / 2)
-        print "center is:", center_x, center_y
+        #print "center is:", center_x, center_y
         if center_x > 0 and center_y > 0:
             zero_count = 0
-            if center_x < middle_x:
-                if ((middle_x - center_x) > (frame_width * .2)):
-                    pt.pan(pt.current_pan + 2)
-                elif ((middle_x - center_x) > (frame_width * .1)):
-                    pt.pan(pt.current_pan + 1)
-            elif center_x > middle_x:
-                if ((center_x - middle_x) > (frame_width * .2)):
-                    pt.pan(pt.current_pan - 2)
-                elif ((center_x - middle_x) > (frame_width * .1)):
-                    pt.pan(pt.current_pan - 1)
-            if center_y < middle_y:
-                if (middle_y - center_y) > (frame_height * .2):
-                    pt.tilt(pt.current_tilt - 2)
-                elif (middle_y - center_y) > (frame_height * .1):
-                    pt.tilt(pt.current_tilt - 1)
-            elif center_y > middle_y:
-                if (center_y - middle_y) > (frame_height * .2):
-                    pt.tilt(pt.current_tilt + 2)
-                if (center_y - middle_y) > (frame_height * .1):
-                    pt.tilt(pt.current_tilt + 1)
+
+            # This is what passes for proportional control atm (aka the 'P' in PID, see:
+            # https://en.wikipedia.org/wiki/PID_controller#Proportional_term); Move in
+            # 2 degree increments when the error is 20% or more, 1 degree otherwise.
+            error_x = abs(middle_x - center_x)
+            signal_x = 2 if error_x >= (frame_width * .20) else 1
+            if error_x > (frame_width * .10):
+                pt.pan(signal_x if center_x < middle_x else -signal_x)
+
+            error_y = abs(middle_y - center_y)
+            signal_y = 2 if error_y >= (frame_height * .20) else 1
+            if error_y > (frame_height * .10):
+                pt.tilt(signal_y if center_y > middle_y else -signal_y)
+
         else:
             zero_count += 1
 
